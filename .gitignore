@@ -1,0 +1,16 @@
+*.ogg
+*.jpg
+*.png
+*.txt
+*.mp4
+*.dat
+*.wav
+*.dll
+*.ttf
+*.ttc
+sounds/
+Debug/
+Release/
+cursors/
+.vs
+*.opensdf
