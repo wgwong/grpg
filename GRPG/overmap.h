@@ -6,4 +6,4 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
-int overmap();
+int overmap(sf::RenderWindow * w);

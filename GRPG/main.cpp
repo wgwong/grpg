@@ -1,7 +1,7 @@
-//#include "title_screen.h"
-#include "overmap.h"
+#include "init.h"
 
 int main() {
-	overmap();
-	//return title_screen();
+	init();
+
+	return 0;
 }

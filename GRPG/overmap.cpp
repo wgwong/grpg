@@ -3,18 +3,11 @@
 #include "Map.h"
 #include "View.h"
 
-int overmap() {
-	//intialization
-	//TODO - put all this in the title screen or something later
-	sf::RenderWindow window;
-	sf::ContextSettings settings;
-	settings.antialiasingLevel = 8; //smoother shapes
-	int width = 800;
-	int height = 600;
-	window.create(sf::VideoMode(width, height), "Generic RPG v0.1a ", sf::Style::Default, settings);
-	window.setVerticalSyncEnabled(true);
+int overmap(sf::RenderWindow * w) {
+	int width = (*w).getSize().x;
+	int height = (*w).getSize().y;
 
-	//TODO finish initialization
+	//TODO finish font initialization
 	sf::Font gameFont;
 	
 	//load background for overmap
@@ -67,12 +60,12 @@ int overmap() {
 
 	bool changed = false; //debug
 
-	while (window.isOpen()) {
+	while ((*w).isOpen()) {
 		sf::Event event;
 
-		while (window.pollEvent(event)) {
+		while ((*w).pollEvent(event)) {
 			if (event.type == sf::Event::Closed) {
-				window.close();
+				(*w).close();
 			}
 		}
 
@@ -207,22 +200,22 @@ int overmap() {
 		}
 
 		//drawing stage
-		window.clear(sf::Color::Black);
+		(*w).clear(sf::Color::Black);
 
-		window.draw(bgSprite); //background
+		(*w).draw(bgSprite); //background
 
 		//overworld objects
 		std::vector<OverworldObject> overObjects = map.getOverworldObjects(view); //TODO - use different data structure to achieve log(n) search
 		for (auto & element : overObjects) {
 			oSprite.setPosition(sf::Vector2f(element.getPos().x - view.getStart().x, element.getPos().y - view.getStart().y));
 			//TODO - check that position isnt <  0,0 or > map.x, map.y
-			window.draw(oSprite);
+			(*w).draw(oSprite);
 		}
 
 		pSprite.setPosition(sf::Vector2f(player.getPos().x - view.getStart().x, player.getPos().y - view.getStart().y));
-		window.draw(pSprite); //player sprite
+		(*w).draw(pSprite); //player sprite
 
-		window.display();
+		(*w).display();
 
 
 		//debug

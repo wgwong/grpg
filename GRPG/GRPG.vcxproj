@@ -123,6 +123,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="enter_shop.cpp" />
+    <ClCompile Include="init.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="overmap.cpp" />
@@ -133,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="enter_shop.h" />
+    <ClInclude Include="init.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="overmap.h" />
     <ClInclude Include="OverworldObject.h" />
