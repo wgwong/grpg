@@ -42,24 +42,30 @@ int overmap(sf::RenderWindow * w) {
 	//TODO load from file
 	std::ifstream mapFile;
 	mapFile.open("maps/basic.dat");
-
+	int mapWidth = 0;
+	int mapHeight = 0;
+	//TODO, handle whitespaces, change file format
 	if (mapFile.is_open()) {
-		const std::string delimiter = ",";
-
-		std::string dimensions = "";
 		std::string objects = "";
 
 		std::string line;
 		std::deque<std::string> lines;
 		while (std::getline(mapFile, line)) {
 			if (line == "[end size]") {
-				lines.pop_front(); //pop [size]
-				for (int i = 0; i < lines.size; i++) {
-					
-				}
+				std::string widthLine = lines.at(1);
+				int splitIndex = widthLine.find(":");
+				mapWidth = stoi(widthLine.substr(splitIndex+1, widthLine.length()));
+
+				std::string heightLine = lines.at(2);
+				splitIndex = heightLine.find(":");
+				mapHeight = stoi(heightLine.substr(splitIndex+1, heightLine.length()));
+				lines.clear();
 			}
 			else if (line == "[end objects]") {
-
+				lines.pop_front(); //pop '[objects]'
+				for (int i = 0; i < lines.size(); i++) {
+					
+				}
 			}
 			else {
 				lines.push_back(line);
@@ -67,7 +73,7 @@ int overmap(sf::RenderWindow * w) {
 		}
 	}
 
-	Map map(sf::Vector2i(1000, 1000));
+	Map map(sf::Vector2i(mapWidth, mapHeight));
 	//invariant - overworld objects must not overlap!
 	map.addOverworldObject(OverworldObject(sf::Vector2i(10, 10)));
 	map.addOverworldObject(OverworldObject(sf::Vector2i(500, 500)));
