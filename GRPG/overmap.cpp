@@ -1,4 +1,5 @@
 #include "overmap.h"
+#include "util.h"
 #include "Player.h"
 #include "Map.h"
 #include "View.h"
@@ -34,11 +35,38 @@ int overmap(sf::RenderWindow * w) {
 
 	//set view
 	View view(sf::Vector2i(0, 0), sf::Vector2i(width, height));
-	const int viewWidthPadding = 50;
-	const int viewHeightPadding = 50;
+	const int viewWidthPadding = 100;
+	const int viewHeightPadding = 100;
 
 	//load map data
 	//TODO load from file
+	std::ifstream mapFile;
+	mapFile.open("maps/basic.dat");
+
+	if (mapFile.is_open()) {
+		const std::string delimiter = ",";
+
+		std::string dimensions = "";
+		std::string objects = "";
+
+		std::string line;
+		std::deque<std::string> lines;
+		while (std::getline(mapFile, line)) {
+			if (line == "[end size]") {
+				lines.pop_front(); //pop [size]
+				for (int i = 0; i < lines.size; i++) {
+					
+				}
+			}
+			else if (line == "[end objects]") {
+
+			}
+			else {
+				lines.push_back(line);
+			}
+		}
+	}
+
 	Map map(sf::Vector2i(1000, 1000));
 	//invariant - overworld objects must not overlap!
 	map.addOverworldObject(OverworldObject(sf::Vector2i(10, 10)));
@@ -58,7 +86,13 @@ int overmap(sf::RenderWindow * w) {
 	Player player;
 	player.setPos(sf::Vector2i(200, 12));
 
-	bool changed = false; //debug
+	//load music
+	sf::Music music;
+	if (!music.openFromFile("music/overworld.ogg")) {
+		return -1; // error
+	}
+	music.setLoop(true);
+	music.play();
 
 	while ((*w).isOpen()) {
 		sf::Event event;
@@ -74,104 +108,58 @@ int overmap(sf::RenderWindow * w) {
 		//left
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
 			if (player.getPos().x - moveSpeed >= 0) {
-				//TODO current collision alg is slightly inaccurate because we prevent movement if movement will put us inside object
-				//but if moveSpeed > 1 and player is not touching object, we will never move to TOUCH the object. we just stop
-				//fix this, keep track of largest permittible movement within collidable objects
-				bool willCollide = false;
 				//TODO - in relation to below's TODO, we check against ALL collidable objects instead of only those near us
-				std::vector<OverworldObject> overObjects = map.getOverworldObjects(view); //TODO - use different data structure to achieve log(n) search
+				//TODO - use different data structure to achieve log(n) search
 				sf::Vector2i dest = player.getPos();
 				dest.x -= moveSpeed;
-				for (auto & element : overObjects) {
 
-					/*
-					std::cout << "dest: " << dest.x << ", " << dest.y << std::endl; //debug
-					std::cout << "dest end: " << dest.x + charWidth << ", " << dest.y + charHeight << std::endl; //debug
-					std::cout << "element: " << element.getPos().x << ", " << element.getPos().y << std::endl; //debug
-					std::cout << "element end: " << element.getPos().x + objWidth << ", " << element.getPos().y + objHeight << std::endl; //debug
-					std::cout << (dest.x > element.getPos().x && dest.x < element.getPos().x + objWidth) << std::endl;
-					std::cout << (dest.x + charWidth > element.getPos().x && dest.x + charWidth < element.getPos().x + objWidth) << std::endl;
-					std::cout << (dest.y > element.getPos().y && dest.y < element.getPos().y + objHeight) << std::endl;
-					std::cout << (dest.y + charHeight > element.getPos().y && dest.y + charHeight < element.getPos().y + objHeight) << std::endl;
-					std::cout << std::endl;
-					*/
-
-					if ((dest.x > element.getPos().x && dest.x < element.getPos().x + objWidth
-						|| dest.x + charWidth > element.getPos().x && dest.x + charWidth < element.getPos().x + objWidth)
-						&& (dest.y > element.getPos().y && dest.y < element.getPos().y + objHeight
-						|| dest.y + charHeight > element.getPos().y && dest.y + charHeight < element.getPos().y + objHeight)) {
-						willCollide = true;
-					}
-				}
-				if (!willCollide) {
+				if (!checkCollision(map.getOverworldObjects(view), dest, sf::Vector2i(charWidth, charHeight), sf::Vector2i(objWidth, objHeight))) {
 					player.move(sf::Vector2i(-moveSpeed, 0));
-					changed = true;
 				}
 			}
 		}
 		//right
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
 			if (player.getPos().x + moveSpeed <= map.getDim().x - charWidth) {
-				bool willCollide = false;
 				//TODO - in relation to below's TODO, we check against ALL collidable objects instead of only those near us
-				std::vector<OverworldObject> overObjects = map.getOverworldObjects(view); //TODO - use different data structure to achieve log(n) search
+				//TODO - use different data structure to achieve log(n) search
 				sf::Vector2i dest = player.getPos();
 				dest.x += moveSpeed;
-				for (auto & element : overObjects) {
-					if ((dest.x > element.getPos().x && dest.x < element.getPos().x + objWidth
-						|| dest.x + charWidth > element.getPos().x && dest.x + charWidth < element.getPos().x + objWidth)
-						&& (dest.y > element.getPos().y && dest.y < element.getPos().y + objHeight
-						|| dest.y + charHeight > element.getPos().y && dest.y + charHeight < element.getPos().y + objHeight)) {
-						willCollide = true;
-					}
-				}
-				if (!willCollide) {
+				
+				if (!checkCollision(map.getOverworldObjects(view),dest,sf::Vector2i(charWidth, charHeight),sf::Vector2i(objWidth, objHeight))) {
 					player.move(sf::Vector2i(moveSpeed, 0));
-					changed = true;
 				}
 			}
 		}
 		//up
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
 			if (player.getPos().y - moveSpeed >= 0) {
-				bool willCollide = false;
 				//TODO - in relation to below's TODO, we check against ALL collidable objects instead of only those near us
-				std::vector<OverworldObject> overObjects = map.getOverworldObjects(view); //TODO - use different data structure to achieve log(n) search
+				//TODO - use different data structure to achieve log(n) search
 				sf::Vector2i dest = player.getPos();
 				dest.y -= moveSpeed;
-				for (auto & element : overObjects) {
-					if ((dest.x > element.getPos().x && dest.x < element.getPos().x + objWidth
-						|| dest.x + charWidth > element.getPos().x && dest.x + charWidth < element.getPos().x + objWidth)
-						&& (dest.y > element.getPos().y && dest.y < element.getPos().y + objHeight
-						|| dest.y + charHeight > element.getPos().y && dest.y + charHeight < element.getPos().y + objHeight)) {
-						willCollide = true;
-					}
-				}
-				if (!willCollide) {
+
+				if (!checkCollision(map.getOverworldObjects(view), dest, sf::Vector2i(charWidth, charHeight), sf::Vector2i(objWidth, objHeight))) {
 					player.move(sf::Vector2i(0, -moveSpeed));
-					changed = true;
+				}
+				else { //enter shop
+					//TODO, currently enter_shop() for ALL collidable objects, but we only want to do this for shop objects
+					music.pause();
+					enter_shop(w, &player);
+					music.play();
 				}
 			}
 		}
 		//down
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
 			if (player.getPos().y + moveSpeed <= map.getDim().y - charHeight) {
-				bool willCollide = false;
 				//TODO - in relation to below's TODO, we check against ALL collidable objects instead of only those near us
-				std::vector<OverworldObject> overObjects = map.getOverworldObjects(view); //TODO - use different data structure to achieve log(n) search
+				//TODO - use different data structure to achieve log(n) search
 				sf::Vector2i dest = player.getPos();
 				dest.y += moveSpeed;
-				for (auto & element : overObjects) {
-					if ((dest.x > element.getPos().x && dest.x < element.getPos().x + objWidth
-						|| dest.x + charWidth > element.getPos().x && dest.x + charWidth < element.getPos().x + objWidth)
-						&& (dest.y > element.getPos().y && dest.y < element.getPos().y + objHeight
-						|| dest.y + charHeight > element.getPos().y && dest.y + charHeight < element.getPos().y + objHeight)) {
-						willCollide = true;
-					}
-				}
-				if (!willCollide) {
+
+				if (!checkCollision(map.getOverworldObjects(view), dest, sf::Vector2i(charWidth, charHeight), sf::Vector2i(objWidth, objHeight))) {
 					player.move(sf::Vector2i(0, moveSpeed));
-					changed = true;
 				}
 			}
 		}
@@ -181,22 +169,18 @@ int overmap(sf::RenderWindow * w) {
 		//left
 		if (player.getPos().x - view.getStart().x < viewWidthPadding && view.getStart().x - moveSpeed >= 0) {
 			view.move(sf::Vector2i(-moveSpeed, 0));
-			changed = true;
 		}
 		//right
 		if (view.getEnd().x - (player.getPos().x + charWidth) < viewWidthPadding && view.getEnd().x + moveSpeed <= map.getDim().x) {
 			view.move(sf::Vector2i(moveSpeed, 0));
-			changed = true;
 		}
 		//up
 		if (player.getPos().y - view.getStart().y < viewHeightPadding && view.getStart().y - moveSpeed >= 0) {
 			view.move(sf::Vector2i(0, -moveSpeed));
-			changed = true;
 		}
 		//down
 		if (view.getEnd().y - (player.getPos().y + charHeight) < viewHeightPadding && view.getEnd().y + moveSpeed <= map.getDim().y) {
 			view.move(sf::Vector2i(0, moveSpeed));
-			changed = true;
 		}
 
 		//drawing stage

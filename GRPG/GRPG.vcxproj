@@ -130,6 +130,7 @@
     <ClCompile Include="OverworldObject.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Shop.cpp" />
+    <ClCompile Include="util.cpp" />
     <ClCompile Include="View.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +141,7 @@
     <ClInclude Include="OverworldObject.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Shop.h" />
+    <ClInclude Include="util.h" />
     <ClInclude Include="View.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
